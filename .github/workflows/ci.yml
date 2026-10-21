@@ -1,0 +1,16 @@
+# CI: fails if any file (except this one) contains the word BAD
+name: CI
+on:
+  pull_request:
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Look for the word BAD
+        run: |
+          if grep -rl --exclude-dir=.git --exclude-dir=.github "BAD" .; then
+            echo "Found BAD: fix it before merging"
+            exit 1
+          fi
+          echo "Clean"
