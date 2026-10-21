@@ -1,0 +1,20 @@
+# After every merge to main: build the image, tag it with the commit ID, push it to the registry
+name: Build image
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  packages: write   # allows pushing to ghcr.io (GitHub's registry)
+jobs:
+  build-push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Log in to the registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+      - name: Build (tag = commit ID)
+        run: docker build -t ghcr.io/${{ github.repository }}:${{ github.sha }} .
+      - name: Push
+        run: docker push ghcr.io/${{ github.repository }}:${{ github.sha }}
